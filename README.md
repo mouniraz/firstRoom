@@ -176,8 +176,9 @@ dependencies {
     implementation ("androidx.room:room-runtime:2.6.1")
     kapt ("androidx.room:room-compiler:2.6.1")
     implementation ("androidx.room:room-ktx:2.6.1")
-} ```
-2. Define Entity
+}
+```
+# 2. Define Entity
 
 In data/Item.kt:
 
@@ -193,8 +194,9 @@ data class Item(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
     val quantity: Int
-)```
-3. Create DAO
+)
+```
+# 3. Create DAO
 
 In data/ItemDao.kt:
 
@@ -214,8 +216,9 @@ interface ItemDao {
 
     @Delete
     suspend fun deleteItem(item: Item)
-}```
-4. Set Up Database
+}
+```
+# 4. Set Up Database
 
 In data/ItemDatabase.kt:
 
