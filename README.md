@@ -256,3 +256,84 @@ abstract class ItemDatabase : RoomDatabase() {
     }
 }
 ```
+## Phase 3: Implement ViewModel and Repository
+Manage UI-related data in a lifecycle-conscious way using ViewModel and abstract data operations with a Repository.
+
+# 🛠️ Steps
+# Create Repository
+
+In data/ItemRepository.kt:
+
+```kotlin
+
+package com.example.inventoryapp.data
+
+import kotlinx.coroutines.flow.Flow
+
+class ItemRepository(private val itemDao: ItemDao) {
+    val allItems: Flow<List<Item>> = itemDao.getAllItems()
+
+    suspend fun insert(item: Item) {
+        itemDao.insertItem(item)
+    }
+
+    suspend fun delete(item: Item) {
+        itemDao.deleteItem(item)
+    }
+}
+```
+# Develop ViewModel
+
+In ui/home/InventoryViewModel.kt:
+
+```kotlin
+package com.example.inventoryapp.ui.home
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.inventoryapp.data.Item
+import com.example.inventoryapp.data.ItemRepository
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+class InventoryViewModel(private val repository: ItemRepository) : ViewModel() {
+    val allItems: StateFlow<List<Item>> = repository.allItems
+        .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
+
+    fun addItem(name: String, quantity: Int) {
+        val item = Item(name = name, quantity = quantity)
+        viewModelScope.launch {
+            repository.insert(item)
+        }
+    }
+
+    fun deleteItem(item: Item) {
+        viewModelScope.launch {
+            repository.delete(item)
+        }
+    }
+}
+
+class InventoryViewModelFactory(private val repository: ItemRepository) : ViewModelProvider.Factory {
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(InventoryViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return InventoryViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+```
+# Integrate ViewModel in MainActivity
+
+In MainActivity.kt, initialize the ViewModel:
+
+```kotlin
+val database = ItemDatabase.getDatabase(this)
+val repository = ItemRepository(database.itemDao())
+val viewModelFactory = InventoryViewModelFactory(repository)
+val viewModel: InventoryViewModel = viewModel(factory = viewModelFactory)
+```
