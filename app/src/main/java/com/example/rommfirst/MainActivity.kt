@@ -11,7 +11,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
+import com.example.rommfirst.data.InventoryViewModel
+import com.example.rommfirst.data.InventoryViewModelFactory
+import com.example.rommfirst.data.ItemDatabase
+import com.example.rommfirst.data.ItemRepository
 import com.example.rommfirst.navigation.AppNavHost
 import com.example.rommfirst.ui.theme.RommFirstTheme
 
@@ -22,6 +27,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             RommFirstTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                    val database = ItemDatabase.getDatabase(this)
+                    val repository = ItemRepository(database.itemDao())
+                    val viewModelFactory = InventoryViewModelFactory(repository)
+                    val viewModel: InventoryViewModel = viewModel(factory = viewModelFactory)
+
                     val navController = rememberNavController()
                     AppNavHost(navController = navController)
 
