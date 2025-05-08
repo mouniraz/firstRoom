@@ -6,13 +6,16 @@ Establish the app's UI structure and navigation flow without integrating data pe
 
 ## 📁 Project Structure
 com.example.inventoryapp/
+```
 ├── ui/
-│ ├── theme/ // App-wide theming (colors, typography)
-│ ├── home/ // Home screen UI
-│ ├── add/ // Add item screen UI
-│ └── components/ // Reusable UI components
-├── navigation/ // Navigation setup
-└── MainActivity.kt // Entry point of the app
+│   ├── theme/         // App-wide theming (colors, typography)
+│   ├── home/          // Home screen UI
+│   ├── add/           // Add item screen UI
+│   └── components/    // Reusable UI components
+├── navigation/        // Navigation setup
+└── MainActivity.kt    // Entry point of the app
+```
+
 
 ## 🛠️ Steps
 
