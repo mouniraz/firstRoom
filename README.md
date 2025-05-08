@@ -337,3 +337,108 @@ val repository = ItemRepository(database.itemDao())
 val viewModelFactory = InventoryViewModelFactory(repository)
 val viewModel: InventoryViewModel = viewModel(factory = viewModelFactory)
 ```
+## ✅ Phase 4 (continued): Connect UI with ViewModel and Room
+# 🧪 1. Update HomeScreen to Show Items
+```kotlin
+
+@Composable
+fun HomeScreen(navController: NavController, viewModel: InventoryViewModel) {
+    val items by viewModel.allItems.collectAsState()
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Inventory App") }) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { navController.navigate("add") }) {
+                Icon(Icons.Default.Add, contentDescription = "Add Item")
+            }
+        }
+    ) { paddingValues ->
+        LazyColumn(modifier = Modifier.padding(paddingValues)) {
+            items(items) { item ->
+                ListItem(
+                    headlineContent = { Text(item.name) },
+                    supportingContent = { Text("Quantity: ${item.quantity}") },
+                    trailingContent = {
+                        IconButton(onClick = { viewModel.deleteItem(item) }) {
+                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                        }
+                    }
+                )
+                Divider()
+            }
+        }
+    }
+}
+```
+# 📝 2. Update AddItemScreen to Save Items
+```kotlin
+
+@Composable
+fun AddItemScreen(navController: NavController, viewModel: InventoryViewModel) {
+    var name by remember { mutableStateOf("") }
+    var quantity by remember { mutableStateOf("") }
+
+    Scaffold(
+        topBar = { TopAppBar(title = { Text("Add Item") }) }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .padding(paddingValues)
+                .padding(16.dp)
+        ) {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Item Name") }
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = quantity,
+                onValueChange = { quantity = it },
+                label = { Text("Quantity") },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = {
+                    if (name.isNotBlank() && quantity.isNotBlank()) {
+                        viewModel.addItem(name, quantity.toIntOrNull() ?: 0)
+                        navController.popBackStack()
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        }
+    }
+}
+```
+# 🔗 3. Pass the ViewModel to Screens via MainActivity
+In MainActivity.kt, provide the ViewModel to your composables:
+
+```kotlin
+setContent {
+    InventoryAppTheme {
+        val navController = rememberNavController()
+        val context = applicationContext
+        val db = ItemDatabase.getDatabase(context)
+        val repository = ItemRepository(db.itemDao())
+        val viewModel: InventoryViewModel = viewModel(
+            factory = InventoryViewModelFactory(repository)
+        )
+
+        AppNavHost(navController = navController, viewModel = viewModel)
+    }
+}
+```
+# Update your AppNavHost to accept viewModel:
+
+```kotlin
+@Composable
+fun AppNavHost(navController: NavHostController, viewModel: InventoryViewModel) {
+    NavHost(navController, startDestination = "home") {
+        composable("home") { HomeScreen(navController, viewModel) }
+        composable("add") { AddItemScreen(navController, viewModel) }
+    }
+}
+```
