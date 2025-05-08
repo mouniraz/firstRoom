@@ -156,3 +156,97 @@ class MainActivity : ComponentActivity() {
     }
 }
 ```
+
+## 🗄️ Phase 2: Integrate Room Database
+# 🎯 Goal
+Implement data persistence using Room to store and retrieve inventory items.
+
+# 🛠️ Steps
+1. Add Room Dependencies
+
+In your build.gradle (app-level):
+
+```kotlin
+
+plugins {
+    id ("kotlin-kapt")
+}
+
+dependencies {
+    implementation ("androidx.room:room-runtime:2.6.1")
+    kapt ("androidx.room:room-compiler:2.6.1")
+    implementation ("androidx.room:room-ktx:2.6.1")
+}
+2. Define Entity
+
+In data/Item.kt:
+
+```kotlin
+
+package com.example.inventoryapp.data
+
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+
+@Entity(tableName = "items")
+data class Item(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val name: String,
+    val quantity: Int
+)```
+3. Create DAO
+
+In data/ItemDao.kt:
+
+```kotlin
+package com.example.inventoryapp.data
+
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ItemDao {
+    @Query("SELECT * FROM items")
+    fun getAllItems(): Flow<List<Item>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertItem(item: Item)
+
+    @Delete
+    suspend fun deleteItem(item: Item)
+}```
+4. Set Up Database
+
+In data/ItemDatabase.kt:
+
+```kotlin
+
+package com.example.inventoryapp.data
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+
+@Database(entities = [Item::class], version = 1)
+abstract class ItemDatabase : RoomDatabase() {
+    abstract fun itemDao(): ItemDao
+
+    companion object {
+        @Volatile
+        private var INSTANCE: ItemDatabase? = null
+
+        fun getDatabase(context: Context): ItemDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    ItemDatabase::class.java,
+                    "item_database"
+                ).build()
+                INSTANCE = instance
+                instance
+            }
+        }
+    }
+}
+```
