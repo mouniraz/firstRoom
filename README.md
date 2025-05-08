@@ -20,7 +20,7 @@ com.example.inventoryapp/
 
 In your `build.gradle` (app-level), add the following dependency:
 
-```gradle
+```kotlin
 dependencies {
     implementation "androidx.navigation:navigation-compose:2.7.1"}
 ```
