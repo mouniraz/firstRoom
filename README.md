@@ -25,7 +25,7 @@ In your `build.gradle` (app-level), add the following dependency:
 
 ```kotlin
 dependencies {
-    implementation "androidx.navigation:navigation-compose:2.7.1"}
+    implementation ("androidx.navigation:navigation-compose:2.7.1")}
 ```
 ## 2.Create Navigation Graph
 
